@@ -63,6 +63,10 @@
             text-decoration: none;
             border-radius: 4px;
         }
+        .disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -71,11 +75,12 @@
     <div class="upload-container">
         <label for="imageInput" class="btn">ইমেজ সিলেক্ট করুন</label>
         <input type="file" id="imageInput" accept="image/*">
-        <button id="upscaleBtn" class="btn" disabled>আপস্কেল করুন</button>
+        <button id="upscaleBtn" class="btn disabled" disabled>আপস্কেল করুন</button>
         
         <img id="preview" alt="প্রিভিউ ইমেজ">
         <div class="loading" id="loading">প্রসেসিং... অনুগ্রহ করে অপেক্ষা করুন</div>
         <div class="error" id="error"></div>
+        <div class="error" id="apikey-message">Upscale feature is temporarily disabled.<br>API Key is missing.</div>
     </div>
     
     <div id="result"></div>
@@ -83,118 +88,49 @@
     <script>
         // DeepAI API কনফিগারেশন
         // ******************************************
-        // এখানে আপনার DeepAI API কী বসাবেন ↓
-        const DEEPAI_API_KEY = '16220de9-81ef-4ac5-bfc2-528bbae901f8'; 
+        // const DEEPAI_API_KEY = '16220de9-81ef-4ac5-bfc2-528bbae901f8'; // <-- API key removed!
         // ******************************************
         
-        const API_URL = 'https://api.deepai.org/api/torch-srgan';
+        // const API_URL = 'https://api.deepai.org/api/torch-srgan';
         
         // DOM এলিমেন্ট
         const imageInput = document.getElementById('imageInput');
         const upscaleBtn = document.getElementById('upscaleBtn');
         const preview = document.getElementById('preview');
-        const loading = document.getElementById('loading');
-        const error = document.getElementById('error');
-        const result = document.getElementById('result');
+        // const loading = document.getElementById('loading');
+        // const error = document.getElementById('error');
+        // const result = document.getElementById('result');
 
-        // ইমেজ প্রিভিউ দেখান
+        // Disable upscale function, just show message
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 // ফাইল ভ্যালিডেশন
                 if(file.size > 1024 * 1024) {
-                    showError('ইমেজ সাইজ 1MB এর বেশি হতে পারবে না');
+                    document.getElementById('error').textContent = 'ইমেজ সাইজ 1MB এর বেশি হতে পারবে না';
                     return;
                 }
-                
                 if(!['image/jpeg', 'image/png'].includes(file.type)) {
-                    showError('শুধুমাত্র JPG/PNG ইমেজ সাপোর্টেড');
+                    document.getElementById('error').textContent = 'শুধুমাত্র JPG/PNG ইমেজ সাপোর্টেড';
                     return;
                 }
-                
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     preview.src = event.target.result;
                     preview.style.display = 'block';
-                    upscaleBtn.disabled = false;
-                    error.textContent = '';
+                    document.getElementById('error').textContent = '';
                 }
                 reader.readAsDataURL(file);
             }
         });
 
-        // আপস্কেল ফাংশন
-        async function upscaleImage() {
-            const file = imageInput.files[0];
-            if (!file) {
-                showError('দয়া করে একটি ইমেজ সিলেক্ট করুন');
-                return;
-            }
+        // আপস্কেল ফাংশন DISABLED
+        // upscaleBtn.addEventListener('click', upscaleImage);
 
-            showLoading(true);
-            clearResults();
-
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
-
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'api-key': DEEPAI_API_KEY // API কী এখানে ব্যবহার হচ্ছে
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.error || 'API রেস্পন্সে সমস্যা হয়েছে');
-                }
-
-                if (!data.output_url) {
-                    throw new Error('আপস্কেল্ড ইমেজ পাওয়া যায়নি');
-                }
-
-                showResult(data.output_url);
-                
-            } catch (err) {
-                showError('ত্রুটি: ' + err.message);
-                console.error('API কল ব্যর্থ:', err);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // হেল্পার ফাংশন
-        function showLoading(show) {
-            loading.style.display = show ? 'block' : 'none';
-            upscaleBtn.disabled = show;
-        }
-
-        function showError(message) {
-            error.textContent = message;
-        }
-
-        function clearResults() {
-            error.textContent = '';
-            result.innerHTML = '';
-        }
-
-        function showResult(imageUrl) {
-            result.innerHTML = `
-                <div class="upload-container">
-                    <h3>আপস্কেল্ড ইমেজ</h3>
-                    <img src="${imageUrl}" style="max-width:100%; margin-top:15px;">
-                    <a href="${imageUrl}" download="upscaled_image.jpg" class="download-btn">
-                        ডাউনলোড করুন
-                    </a>
-                </div>
-            `;
-        }
-
-        // বাটন ক্লিক ইভেন্ট
-        upscaleBtn.addEventListener('click', upscaleImage);
+        // Show disabled message on click
+        upscaleBtn.addEventListener('click', function() {
+            document.getElementById('error').textContent = 'Upscale feature is temporarily disabled. Please add your API key.';
+        });
     </script>
 </body>
 </html>
