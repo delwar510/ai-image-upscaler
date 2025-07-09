@@ -32,14 +32,21 @@
             cursor: pointer;
             font-size: 16px;
             margin: 10px 5px;
+            transition: background 0.3s;
         }
         .btn:hover {
             background: #2980b9;
         }
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
         #preview {
             max-width: 100%;
+            max-height: 300px;
             margin-top: 20px;
             display: none;
+            border-radius: 4px;
         }
         #result {
             margin-top: 20px;
@@ -53,6 +60,7 @@
         .error {
             color: #e74c3c;
             margin-top: 10px;
+            min-height: 20px;
         }
         .download-btn {
             display: inline-block;
@@ -62,10 +70,13 @@
             color: white;
             text-decoration: none;
             border-radius: 4px;
+            transition: background 0.3s;
         }
-        .disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
+        .download-btn:hover {
+            background: #27ae60;
+        }
+        .success {
+            color: #27ae60;
         }
     </style>
 </head>
@@ -75,12 +86,14 @@
     <div class="upload-container">
         <label for="imageInput" class="btn">ইমেজ সিলেক্ট করুন</label>
         <input type="file" id="imageInput" accept="image/*">
-        <button id="upscaleBtn" class="btn disabled" disabled>আপস্কেল করুন</button>
+        <button id="upscaleBtn" class="btn" disabled>আপস্কেল করুন</button>
         
         <img id="preview" alt="প্রিভিউ ইমেজ">
-        <div class="loading" id="loading">প্রসেসিং... অনুগ্রহ করে অপেক্ষা করুন</div>
+        <div class="loading" id="loading">
+            <div>প্রসেসিং চলছে... অনুগ্রহ করে অপেক্ষা করুন</div>
+            <div class="loader" style="margin: 10px auto; width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        </div>
         <div class="error" id="error"></div>
-        <div class="error" id="apikey-message">Upscale feature is temporarily disabled.<br>API Key is missing.</div>
     </div>
     
     <div id="result"></div>
@@ -88,48 +101,156 @@
     <script>
         // DeepAI API কনফিগারেশন
         // ******************************************
-        // const DEEPAI_API_KEY = '16220de9-81ef-4ac5-bfc2-528bbae901f8'; // <-- API key removed!
+        // এখানে আপনার DeepAI API কী বসাবেন ↓
+        const DEEPAI_API_KEY = 'e4a308f0-ebd5-4cd9-9d45-4a519a76a9ef'; // আপনার API কী দিয়ে প্রতিস্থাপন করুন
         // ******************************************
         
-        // const API_URL = 'https://api.deepai.org/api/torch-srgan';
+        const API_URL = 'https://api.deepai.org/api/torch-srgan';
         
         // DOM এলিমেন্ট
         const imageInput = document.getElementById('imageInput');
         const upscaleBtn = document.getElementById('upscaleBtn');
         const preview = document.getElementById('preview');
-        // const loading = document.getElementById('loading');
-        // const error = document.getElementById('error');
-        // const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const result = document.getElementById('result');
 
-        // Disable upscale function, just show message
+        // ইমেজ প্রিভিউ দেখান
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
+            error.textContent = '';
+            result.innerHTML = '';
+            
             if (file) {
                 // ফাইল ভ্যালিডেশন
-                if(file.size > 1024 * 1024) {
-                    document.getElementById('error').textContent = 'ইমেজ সাইজ 1MB এর বেশি হতে পারবে না';
+                if(file.size > 2 * 1024 * 1024) { // 2MB লিমিট
+                    showError('ইমেজ সাইজ 2MB এর বেশি হতে পারবে না');
+                    upscaleBtn.disabled = true;
                     return;
                 }
-                if(!['image/jpeg', 'image/png'].includes(file.type)) {
-                    document.getElementById('error').textContent = 'শুধুমাত্র JPG/PNG ইমেজ সাপোর্টেড';
+                
+                if(!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+                    showError('শুধুমাত্র JPG/PNG ইমেজ সাপোর্টেড');
+                    upscaleBtn.disabled = true;
                     return;
                 }
+                
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     preview.src = event.target.result;
                     preview.style.display = 'block';
-                    document.getElementById('error').textContent = '';
+                    upscaleBtn.disabled = false;
                 }
                 reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+                upscaleBtn.disabled = true;
             }
         });
 
-       const resp = await fetch("https://api.deepai.org/api/torch-srgan", {
-    method: "POST",
-    headers: {
-        "api-key": "e4a308f0-ebd5-4cd9-9d45-4a519a76a9ef"
-    },
-    body: formData,});
+        // আপস্কেল ফাংশন
+        async function upscaleImage() {
+            const file = imageInput.files[0];
+            if (!file) {
+                showError('দয়া করে একটি ইমেজ সিলেক্ট করুন');
+                return;
+            }
+
+            showLoading(true);
+            clearResults();
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'api-key': a9055cb5-e583-43a2-a675-d9a865fbf04c
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || `API রেস্পন্সে সমস্যা (স্ট্যাটাস: ${response.status})`);
+                }
+
+                if (!data.output_url) {
+                    throw new Error('আপস্কেল্ড ইমেজ URL পাওয়া যায়নি');
+                }
+
+                showResult(data.output_url);
+                showSuccess('ইমেজ সফলভাবে আপস্কেল হয়েছে!');
+                
+            } catch (err) {
+                handleApiError(err);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // হেল্পার ফাংশন
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+            upscaleBtn.disabled = show;
+        }
+
+        function showError(message) {
+            error.textContent = message;
+            error.style.color = '#e74c3c';
+        }
+
+        function showSuccess(message) {
+            error.textContent = message;
+            error.style.color = '#27ae60';
+        }
+
+        function clearResults() {
+            error.textContent = '';
+            result.innerHTML = '';
+        }
+
+        function showResult(imageUrl) {
+            result.innerHTML = `
+                <div class="upload-container">
+                    <h3>আপস্কেল্ড ইমেজ</h3>
+                    <img src="${imageUrl}" style="max-width:100%; max-height:400px; border-radius:4px;">
+                    <a href="${imageUrl}" download="upscaled_image.jpg" class="download-btn">
+                        ডাউনলোড করুন
+                    </a>
+                </div>
+            `;
+        }
+
+        function handleApiError(error) {
+            console.error('API কল ব্যর্থ:', error);
+            
+            const errorMessages = {
+                '401': 'API কী ভুল বা মিসিং। সঠিক কী ব্যবহার করুন।',
+                '429': 'আপনি API রেট লিমিট превышен করেছেন। কিছুক্ষণ পর আবার চেষ্টা করুন।',
+                'default': `ইমেজ আপস্কেল করতে ব্যর্থ: ${error.message}`
+            };
+            
+            const status = error.message.match(/স্ট্যাটাস: (\d+)/)?.[1];
+            const message = errorMessages[status] || errorMessages['default'];
+            
+            showError(message);
+        }
+
+        // বাটন ক্লিক ইভেন্ট
+        upscaleBtn.addEventListener('click', upscaleImage);
+
+        // CSS অ্যানিমেশন
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
