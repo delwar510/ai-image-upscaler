@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ফ্রি AI ইমেজ আপস্কেলার</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .upload-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #imageInput {
+            display: none;
+        }
+        .upload-btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .upload-btn:hover {
+            background: #2980b9;
+        }
+        #preview {
+            max-width: 100%;
+            margin-top: 20px;
+            display: none;
+        }
+        #result {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ফ্রি AI ইমেজ আপস্কেলার</h1>
+    
+    <div class="upload-container">
+        <label for="imageInput" class="upload-btn">ইমেজ সিলেক্ট করুন</label>
+        <input type="file" id="imageInput" accept="image/*">
+        <button id="upscaleBtn" class="upload-btn" disabled>আপস্কেল করুন</button>
+        
+        <img id="preview" alt="প্রিভিউ ইমেজ">
+        <div class="loading" id="loading">প্রসেসিং... অনুগ্রহ করে অপেক্ষা করুন</div>
+        <div class="error" id="error"></div>
+    </div>
+    
+    <div id="result"></div>
+
+    <script>
+        // DOM elements
+        const imageInput = document.getElementById('imageInput');
+        const upscaleBtn = document.getElementById('upscaleBtn');
+        const preview = document.getElementById('preview');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const result = document.getElementById('result');
+
+        // Image preview
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                    upscaleBtn.disabled = false;
+                    error.textContent = '';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Upscale function
+        async function upscaleImage() {
+            const file = imageInput.files[0];
+            if (!file) {
+                error.textContent = 'দয়া করে একটি ইমেজ সিলেক্ট করুন';
+                return;
+            }
+
+            // Show loading
+            loading.style.display = 'block';
+            upscaleBtn.disabled = true;
+            error.textContent = '';
+            result.innerHTML = '';
+
+            try {
+                // Using a free proxy to access Hugging Face API
+                const API_URL = 'https://api-inference.huggingface.co/models/eugenesiow/Real-ESRGAN';
+                
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer hf_YourFreeTokenHere' // Replace with your token
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('API রেস্পন্সে সমস্যা হয়েছে');
+                }
+
+                const imageBlob = await response.blob();
+                const imageUrl = URL.createObjectURL(imageBlob);
+                
+                result.innerHTML = `
+                    <div class="upload-container">
+                        <h2>আপস্কেল্ড ইমেজ</h2>
+                        <img src="${imageUrl}" style="max-width: 100%; margin-top: 10px;">
+                        <a href="${imageUrl}" download="upscaled_image.png" class="upload-btn" style="display: inline-block; margin-top: 15px;">
+                            ডাউনলোড করুন
+                        </a>
+                    </div>
+                `;
+
+            } catch (err) {
+                error.textContent = 'ত্রুটি: ' + err.message;
+                console.error(err);
+            } finally {
+                loading.style.display = 'none';
+                upscaleBtn.disabled = false;
+            }
+        }
+
+        // Button click event
+        upscaleBtn.addEventListener('click', upscaleImage);
+    </script>
+</body>
+</html>
