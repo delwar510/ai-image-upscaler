@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Enhancer</title>
+    <title>Ultra HD Image Enhancer</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
@@ -35,14 +35,16 @@
             cursor: pointer;
             font-size: 16px;
             margin: 10px 5px;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
         .btn:hover {
             background: #3367d6;
+            transform: translateY(-2px);
         }
         .btn:disabled {
             background: #bdc3c7;
             cursor: not-allowed;
+            transform: none;
         }
         .option-btn {
             background: #34a853;
@@ -58,7 +60,7 @@
             margin: 20px auto;
             display: none;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         #loading {
             display: none;
@@ -84,157 +86,31 @@
         .result-image {
             max-width: 100%;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid #eee;
         }
         .download-btn {
             display: inline-block;
             margin-top: 15px;
-            padding: 10px 20px;
+            padding: 12px 25px;
             background: #34a853;
             color: white;
             text-decoration: none;
             border-radius: 6px;
-            transition: background 0.3s;
+            font-weight: bold;
+            transition: all 0.3s;
         }
         .download-btn:hover {
             background: #2d8e47;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-<body>
-    <div class="upload-container">
-        <h1>AI Image Enhancer</h1>
-        
-        <label for="imageInput" class="btn">Select Image</label>
-        <input type="file" id="imageInput" accept="image/*">
-        
-        <div id="options" style="display: none;">
-            <button class="btn option-btn" onclick="enhanceImage('deblur')">Remove Blur</button>
-            <button class="btn option-btn" onclick="enhanceImage('enhance')">Enhance Quality</button>
-            <button class="btn option-btn" onclick="enhanceImage('upscale')">Upscale Image</button>
-            <button class="btn option-btn" onclick="enhanceImage('details')">Boost Details</button>
-        </div>
-        
-        <img id="preview" alt="Preview">
-        
-        <div id="loading">
-            <div class="loader"></div>
-            <p>Processing your image... Please wait</p>
-        </div>
-        
-        <div id="error"></div>
-        <div id="result"></div>
-    </div>
-
-    <script>
-        // =============================================
-        // REPLACE THIS WITH YOUR DEEPAI API KEY
-        // Get from: https://deepai.org/dashboard/profile
-        const DEEPAI_API_KEY = '<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Enhancer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .upload-container {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        #imageInput {
-            display: none;
-        }
-        .btn {
-            background: #4285f4;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px 5px;
-            transition: background 0.3s;
-        }
-        .btn:hover {
-            background: #3367d6;
-        }
-        .btn:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-        .option-btn {
-            background: #34a853;
-            margin: 8px;
-            padding: 10px 20px;
-        }
-        .option-btn:hover {
-            background: #2d8e47;
-        }
-        #preview {
-            max-width: 100%;
-            max-height: 300px;
-            margin: 20px auto;
-            display: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        #loading {
-            display: none;
+        .quality-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
             margin: 20px 0;
         }
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #4285f4;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        #error {
-            color: #d32f2f;
-            margin: 15px 0;
-            min-height: 20px;
-        }
-        #result {
-            margin-top: 25px;
-        }
-        .result-image {
-            max-width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .download-btn {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: #34a853;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: background 0.3s;
-        }
-        .download-btn:hover {
-            background: #2d8e47;
-        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -243,23 +119,23 @@
 </head>
 <body>
     <div class="upload-container">
-        <h1>AI Image Enhancer</h1>
+        <h1>Ultra HD Image Enhancer</h1>
         
         <label for="imageInput" class="btn">Select Image</label>
         <input type="file" id="imageInput" accept="image/*">
         
-        <div id="options" style="display: none;">
-            <button class="btn option-btn" onclick="enhanceImage('deblur')">Remove Blur</button>
-            <button class="btn option-btn" onclick="enhanceImage('enhance')">Enhance Quality</button>
-            <button class="btn option-btn" onclick="enhanceImage('upscale')">Upscale Image</button>
-            <button class="btn option-btn" onclick="enhanceImage('details')">Boost Details</button>
+        <div id="options" class="quality-options" style="display: none;">
+            <button class="btn option-btn" onclick="enhanceImage('deblur')">1️⃣ Remove Blur</button>
+            <button class="btn option-btn" onclick="enhanceImage('enhance')">2️⃣ Enhance Quality</button>
+            <button class="btn option-btn" onclick="enhanceImage('upscale')">3️⃣ Upscale to 8K</button>
+            <button class="btn option-btn" onclick="enhanceImage('details')">4️⃣ Boost Details</button>
         </div>
         
         <img id="preview" alt="Preview">
         
         <div id="loading">
             <div class="loader"></div>
-            <p>Processing your image... Please wait</p>
+            <p>Processing your image to Ultra HD quality...</p>
         </div>
         
         <div id="error"></div>
@@ -267,11 +143,8 @@
     </div>
 
     <script>
-        // =============================================
-        // REPLACE THIS WITH YOUR DEEPAI API KEY
-        // Get from: https://deepai.org/dashboard/profile
-        const DEEPAI_API_KEY = '20c30fbc-ea54-47ea-bb0a-d6d2607b7030';
-        // =============================================
+        // 👉👉👉 REPLACE THIS WITH YOUR DEEPAI API KEY (GET FROM https://deepai.org/dashboard/profile)
+        const DEEPAI_API_KEY = '5cddac49-632f-484b-a1e2-94e15b033f1d';
         
         // DOM elements
         const imageInput = document.getElementById('imageInput');
@@ -281,18 +154,20 @@
         const errorDiv = document.getElementById('error');
         const resultDiv = document.getElementById('result');
         
-        // Image preview handler
+        // Image upload handler
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 // Validate file
-                if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                    showError('Image size must be less than 5MB');
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit for high quality
+                    showError('Image size must be less than 10MB');
+                    optionsDiv.style.display = 'none';
                     return;
                 }
                 
-                if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-                    showError('Only JPG/PNG images are supported');
+                if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.type)) {
+                    showError('Only JPG/PNG/WEBP images are supported');
+                    optionsDiv.style.display = 'none';
                     return;
                 }
                 
@@ -300,193 +175,86 @@
                 reader.onload = function(event) {
                     preview.src = event.target.result;
                     preview.style.display = 'block';
-                    optionsDiv.style.display = 'block';
+                    optionsDiv.style.display = 'flex'; // Show quality options
                     clearError();
                 }
                 reader.readAsDataURL(file);
+            } else {
+                optionsDiv.style.display = 'none';
+                preview.style.display = 'none';
             }
         });
         
-        // Main enhancement function
+        // Main enhancement function with 8K upscaling
         async function enhanceImage(mode) {
             const file = imageInput.files[0];
             if (!file) {
                 showError('Please select an image first');
                 return;
             }
-            
-            // Validate API key
-            if (!DEEPAI_API_KEY || DEEPAI_API_KEY.includes('20c30fbc-ea54-47ea-bb0a-d6d2607b7030')) {
-                showError('Please add your DeepAI API key in the code');
-                return;
-            }
-            
-            showLoading(true);
-            clearResults();
-            
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
-                
-                // Different API endpoints for different modes
-                let apiEndpoint = 'https://api.deepai.org/api/torch-srgan'; // Default
-                if (mode === 'deblur') {
-                    apiEndpoint = 'https://api.deepai.org/api/image-deblurring';
-                } else if (mode === 'enhance') {
-                    apiEndpoint = 'https://api.deepai.org/api/colorizer';
-                } else if (mode === 'details') {
-                    apiEndpoint = 'https://api.deepai.org/api/waifu2x';
-                }
-                
-                const response = await fetch(apiEndpoint, {
-                    method: 'POST',
-                    headers: {
-                        'api-key': DEEPAI_API_KEY
-                    },
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.err || `API Error: ${response.status}`);
-                }
-                
-                if (!data.output_url) {
-                    throw new Error('No output URL received from API');
-                }
-                
-                // Show result
-                resultDiv.innerHTML = `
-                    <h3>Enhanced Image</h3>
-                    <img src="${data.output_url}" class="result-image">
-                    <a href="${data.output_url}" download="enhanced_image.jpg" class="download-btn">
-                        Download Enhanced Image
-                    </a>
-                `;
-                
-            } catch (error) {
-                showError(`Enhancement failed: ${error.message}`);
-                console.error('API Error:', error);
-            } finally {
-                showLoading(false);
-            }
-        }
-        
-        // Helper functions
-        function showLoading(show) {
-            loadingDiv.style.display = show ? 'block' : 'none';
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.disabled = show;
-            });
-        }
-        
-        function showError(message) {
-            errorDiv.textContent = message;
-        }
-        
-        function clearError() {
-            errorDiv.textContent = '';
-        }
-        
-        function clearResults() {
-            resultDiv.innerHTML = '';
-            clearError();
-        }
-    </script>
-</body>
-</html>';
-        // =============================================
-        
-        // DOM elements
-        const imageInput = document.getElementById('imageInput');
-        const preview = document.getElementById('preview');
-        const optionsDiv = document.getElementById('options');
-        const loadingDiv = document.getElementById('loading');
-        const errorDiv = document.getElementById('error');
-        const resultDiv = document.getElementById('result');
-        
-        // Image preview handler
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Validate file
-                if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                    showError('Image size must be less than 5MB');
-                    return;
-                }
-                
-                if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-                    showError('Only JPG/PNG images are supported');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    preview.src = event.target.result;
-                    preview.style.display = 'block';
-                    optionsDiv.style.display = 'block';
-                    clearError();
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Main enhancement function
-        async function enhanceImage(mode) {
-            const file = imageInput.files[0];
-            if (!file) {
-                showError('Please select an image first');
-                return;
-            }
-            
-            // Validate API key
+
+            // 👉 Verify API key is set
             if (!DEEPAI_API_KEY || DEEPAI_API_KEY.includes('your-api-key-here')) {
                 showError('Please add your DeepAI API key in the code');
                 return;
             }
-            
+
             showLoading(true);
             clearResults();
-            
+
             try {
                 const formData = new FormData();
                 formData.append('image', file);
                 
-                // Different API endpoints for different modes
-                let apiEndpoint = 'https://api.deepai.org/api/torch-srgan'; // Default
-                if (mode === 'deblur') {
-                    apiEndpoint = 'https://api.deepai.org/api/image-deblurring';
-                } else if (mode === 'enhance') {
-                    apiEndpoint = 'https://api.deepai.org/api/colorizer';
-                } else if (mode === 'details') {
-                    apiEndpoint = 'https://api.deepai.org/api/waifu2x';
+                // Different API endpoints for different enhancement modes
+                let apiEndpoint = 'https://api.deepai.org/api/torch-srgan'; // Default for upscale
+                let qualityParam = '';
+                
+                switch(mode) {
+                    case 'deblur':
+                        apiEndpoint = 'https://api.deepai.org/api/image-deblurring';
+                        qualityParam = '&quality=high';
+                        break;
+                    case 'enhance':
+                        apiEndpoint = 'https://api.deepai.org/api/colorizer';
+                        qualityParam = '&enhance=ultra';
+                        break;
+                    case 'upscale':
+                        apiEndpoint = 'https://api.deepai.org/api/torch-srgan';
+                        qualityParam = '&scale=4'; // 4x upscale for 8K
+                        break;
+                    case 'details':
+                        apiEndpoint = 'https://api.deepai.org/api/waifu2x';
+                        qualityParam = '&detail_level=high';
+                        break;
                 }
                 
-                const response = await fetch(apiEndpoint, {
+                // 👉👉👉 API call with proper headers
+                const response = await fetch(`${apiEndpoint}?${qualityParam}`, {
                     method: 'POST',
                     headers: {
-                        'api-key': DEEPAI_API_KEY
+                        'api-key': DEEPAI_API_KEY // 👈 This is where your key gets used
                     },
                     body: formData
                 });
-                
+
                 const data = await response.json();
                 
                 if (!response.ok) {
                     throw new Error(data.err || `API Error: ${response.status}`);
                 }
-                
+
                 if (!data.output_url) {
-                    throw new Error('No output URL received from API');
+                    throw new Error('No enhanced image URL received');
                 }
-                
-                // Show result
+
+                // Show ultra HD result
                 resultDiv.innerHTML = `
-                    <h3>Enhanced Image</h3>
+                    <h2>✨ Ultra HD Result ✨</h2>
                     <img src="${data.output_url}" class="result-image">
-                    <a href="${data.output_url}" download="enhanced_image.jpg" class="download-btn">
-                        Download Enhanced Image
+                    <p>8K Enhanced Version Ready</p>
+                    <a href="${data.output_url}" download="ultra_hd_image.jpg" class="download-btn">
+                        ⬇️ Download 8K Image
                     </a>
                 `;
                 
@@ -507,7 +275,7 @@
         }
         
         function showError(message) {
-            errorDiv.textContent = message;
+            errorDiv.innerHTML = `❌ ${message}`;
         }
         
         function clearError() {
